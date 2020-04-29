@@ -177,11 +177,23 @@ class restaurant(Toplevel):
        for row in records:
             n = int(row[0])
        n=n+1
+       cursor.execute('SELECT COUNT(*) FROM Restaurant3 WHERE restemail = ?',(email,))
+       records = cursor.fetchall()
+       for row in records:
+            n1 = int(row[0])
+       cursor.execute('SELECT COUNT(*) FROM Restaurant3 WHERE restphone = ?',(phone,))
+       records = cursor.fetchall()
+       for row in records:
+            n2 = int(row[0])
        #custid=str(n)
-       cursor.execute('INSERT INTO Restaurant3 (RestID,restname,restemail,restphone,restadd,type,avgprice,password,closetime,opentime,available) VALUES(?,?,?,?,?,?,?,?,?,?,?)',(n,name1,email,phone,address,type1,avg_price,password,closetime,opentime,available_status))
-       self.conn.commit()
-       self.confirm = Label(self, text="Restaurant Registered!",width=20,font=("bold", 10))
-       self.confirm.place(x=180,y=560)
+       if n1==0 and n2==0:
+           cursor.execute('INSERT INTO Restaurant3 (RestID,restname,restemail,restphone,restadd,type,avgprice,password,closetime,opentime,available) VALUES(?,?,?,?,?,?,?,?,?,?,?)',(n,name1,email,phone,address,type1,avg_price,password,closetime,opentime,available_status))
+           self.conn.commit()
+           self.confirm = Label(self, text="Restaurant Registered!",width=20,font=("bold", 10))
+           self.confirm.place(x=180,y=560)
+       else:
+           self.inv = Label(self, text="Email/Phone number already taken",width=20,font=("bold", 10))
+           self.inv.place(x=180,y=560)
     def __init__(self):
         Toplevel.__init__(self)
         self.geometry('500x600')
@@ -256,8 +268,18 @@ class customer(Toplevel):
             n = int(row[0])
        n=n+1
        custid=str(n)
-       cursor.execute('INSERT INTO Customer3 (CustID,FullName,Email,Phone,Address,Membership,Password,CouponID) VALUES(?,?,?,?,?,?,?,?)',(n,name1,email,phone,address,membership,password,cid))
-       self.conn.commit()
+       cursor.execute('SELECT COUNT(*) FROM Customer3 WHERE Email = ?',(email,))
+       records = cursor.fetchall()
+       for row in records:
+            n1 = int(row[0])
+       
+       if n1==0:
+           cursor.execute('INSERT INTO Customer3 (CustID,FullName,Email,Phone,Address,Membership,Password,CouponID) VALUES(?,?,?,?,?,?,?,?)',(n,name1,email,phone,address,membership,password,cid))
+           self.conn.commit()
+       else:
+           #print("hello")
+           self.label_inv = Label(self, text="Email already exists",width=20,font=("bold", 20))
+           self.label_inv.place(x=180,y=500)
     def __init__(self):
         Toplevel.__init__(self)
         self.geometry('500x600')
@@ -281,6 +303,7 @@ class customer(Toplevel):
         self.label_3.place(x=70,y=230)
         self.entry_3 = Entry(self,textvar=self.phonenum)
         self.entry_3.place(x=240,y=230)
+        
         self.label_4 = Label(self, text="Address",width=20,font=("bold", 10))
         self.label_4.place(x=70,y=280)
         self.entry_4 = Entry(self,textvar=self.add)
