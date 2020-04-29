@@ -4,7 +4,7 @@ import time as tm
 root = Tk()
 root.geometry('900x700')
 root.title("HomePage")
-root.configure(bg='purple')
+root.configure(bg='black')
 class complaintexec(Toplevel):
     comname = StringVar()
     comemail = StringVar()
@@ -377,6 +377,91 @@ class addItem(Toplevel):
         self.entry_6.place(x=240,y=320)
         
         Button(self, text='Submit',width=20,bg='brown',fg='white',command=self.database).place(x=180,y=400)
+#Start
+class editItem(Toplevel):
+    d_id = IntVar()
+    dcolumn = StringVar()
+    dvalue = StringVar()
+    rid=0
+    conn = sqlite3.connect('data.db')
+    def database(self):
+        with self.conn:
+                cursor=self.conn.cursor()
+        if self.dcolumn.get() == 'DishID' or self.dcolumn.get() == 'dishname' or self.dcolumn.get() == 'dishtype' or self.dcolumn.get() == 'availability' or self.dcolumn.get() == 'size':
+            
+            cursor.execute('CREATE INDEX IF NOT EXISTS dish_rest ON Menu(restid,DishID)')
+            if self.dcolumn.get() == 'DishID':
+                cursor.execute('UPDATE Menu SET DishID = ? WHERE restid = ? AND DishID = ?',(self.dvalue.get(),self.rid,self.d_id.get()))
+            if self.dcolumn.get() == 'dishname':
+                cursor.execute('UPDATE Menu SET dishname = ? WHERE restid = ? AND DishID = ?',(self.dvalue.get(),self.rid,self.d_id.get()))
+            if self.dcolumn.get() == 'dishtype':
+                cursor.execute('UPDATE Menu SET dishtype = ? WHERE restid = ? AND DishID = ?',(self.dvalue.get(),self.rid,self.d_id.get()))
+            if self.dcolumn.get() == 'availability':
+                cursor.execute('UPDATE Menu SET availability = ? WHERE restid = ? AND DishID = ?',(self.dvalue.get(),self.rid,self.d_id.get()))
+            if self.dcolumn.get() == 'size':
+                cursor.execute('UPDATE Menu SET size = ? WHERE restid = ? AND DishID = ?',(self.dvalue.get(),self.rid,self.d_id.get()))
+            self.conn.commit()
+            self.label_confirm = Label(self, text='Item Edited Succesfully !',width=20,font=("bold", 10))
+            self.label_confirm.place(x=180,y=460)
+        elif self.dcolumn.get() == 'price':
+            if self.dvalue.get().isdigit():
+                cursor.execute('CREATE INDEX IF NOT EXISTS dish_rest ON Menu(restid,DishID)')
+                cursor.execute('UPDATE Menu SET price = ? WHERE restid = ? AND DishID = ?',(int(self.dvalue.get()),self.rid, self.d_id.get()))
+                self.conn.commit()
+                self.label_confirm = Label(self, text='Item Edited Succesfully !',width=20,font=("bold", 10))
+                self.label_confirm.place(x=180,y=460)
+            else:
+                self.label_notvalid = Label(self, text='Invalid Value',width=20,font=("bold", 10))
+                self.label_notvalid.place(x=180,y=460)
+        else:
+            self.label_a = Label(self, text='Invalid column',width=20,font=("bold", 10))
+            self.label_a.place(x=180,y=460)
+    def __init__(self,restid):
+        Toplevel.__init__(self)
+        self.geometry('500x600')
+        self.rid = restid
+        self.label_0 = Label(self, text="Edit Item",width=20,font=("bold", 20))
+        self.label_0.place(x=70,y=53)
+
+
+        self.label_1 = Label(self, text="Enter Dish ID",width=20,font=("bold", 10))
+        self.label_1.place(x=60,y=130)
+
+        self.entry_1 = Entry(self,textvar=self.d_id)
+        self.entry_1.place(x=240,y=130)
+
+        self.label_2 = Label(self, text="Enter Column Value to Update",width=20,font=("bold", 10))
+        self.label_2.place(x=60,y=180)
+
+        self.entry_2 = Entry(self,textvar=self.dcolumn)
+        self.entry_2.place(x=240,y=180)
+
+        self.label_3 = Label(self, text="Enter New Value",width=20,font=("bold", 10))
+        self.label_3.place(x=60,y=230)
+        self.entry_3 = Entry(self,textvar=self.dvalue)
+        self.entry_3.place(x=240,y=230)
+        Button(self, text='Submit',width=20,bg='brown',fg='white',command=self.database).place(x=180,y=400)
+        
+                
+        
+class viewItem(Toplevel):
+    rid = 0
+    def __init__(self,restid):
+        self.rid = restid
+        Toplevel.__init__(self)
+        self.geometry('900x700')
+        self.configure(bg='pink')
+        conn = sqlite3.connect('data.db')
+        with conn:
+            cursor=conn.cursor()
+        cursor.execute('SELECT * FROM Menu WHERE restid = ?',(self.rid,))
+        ind=0
+        for row in cursor.fetchall():
+            self.label_1 = Label(self, text=row,width=80,font=("bold", 10))
+            self.label_1.place(x=200,y=20+ind)
+            ind=ind+40
+
+#end        
 class restDash(Toplevel):
     restid=0
     def additems(self):
@@ -453,8 +538,8 @@ class restDash(Toplevel):
         self.label_8 = Label(self, text=stravailable,width=50,font=("bold", 10))
         self.label_8.place(x=100,y=240)
         Button(self, text='Add Item',width=20,bg='brown',fg='white',command=self.additems).place(x=180,y=270)
-        Button(self, text='Edit an Item',width=20,bg='brown',fg='white',command=self.edititems).place(x=180,y=290)
-        Button(self, text='View Items',width=20,bg='brown',fg='white',command=self.viewitems).place(x=180,y=320)
+        Button(self, text='Edit an Item',width=20,bg='brown',fg='white',command=self.edititems).place(x=180,y=300)
+        Button(self, text='View Items',width=20,bg='brown',fg='white',command=self.viewitems).place(x=180,y=330)
         
 class custDash(Toplevel):
     def __init__(self,rowid):
@@ -491,7 +576,71 @@ class custDash(Toplevel):
         self.label_5 = Label(self, text=strmem,width=50,font=("bold", 10))
         self.label_5.place(x=100,y=180)
         self.label_6 = Label(self, text=strcoupid,width=50,font=("bold", 10))
-        self.label_6.place(x=100,y=200)      
+        self.label_6.place(x=100,y=200)
+
+class comDash(Toplevel):
+    def __init__(self,rowid):
+        Toplevel.__init__(self)
+        self.geometry('900x700')
+        self.configure(bg='pink')
+        conn = sqlite3.connect('data.db')
+        with conn:
+            cursor=conn.cursor()
+        cursor.execute('SELECT * FROM ComplaintExec')
+        records = cursor.fetchall()
+        for row in records:
+            if row[0]==rowid:
+                welcmsg = "Welcome "+row[1];
+                self.label_1 = Label(self, text=welcmsg,width=20,font=("bold", 30))
+                self.label_1.place(x=200,y=20)
+                self.label_2 = Label(self, text="User Details",width=50,font=("bold", 10))
+                self.label_2.place(x=100,y=80)
+                strname="Name: "+row[1]
+                stremail="Email: "+row[2]
+                strphone="Phone: "+str(row[3])
+                stradd="Active status: "+row[5]
+
+        self.label_1 = Label(self, text=strname,width=50,font=("bold", 10))
+        self.label_1.place(x=100,y=100)
+        self.label_2 = Label(self, text=stremail,width=50,font=("bold", 10))
+        self.label_2.place(x=100,y=120)
+        self.label_3 = Label(self, text=strphone,width=50,font=("bold", 10))
+        self.label_3.place(x=100,y=140)
+        self.label_4 = Label(self, text=stradd,width=50,font=("bold", 10))
+        self.label_4.place(x=100,y=160)
+class delDash(Toplevel):
+    def __init__(self,rowid):
+        Toplevel.__init__(self)
+        self.geometry('900x700')
+        self.configure(bg='pink')
+        conn = sqlite3.connect('data.db')
+        with conn:
+            cursor=conn.cursor()
+        cursor.execute('SELECT * FROM DeliveryExec')
+        records = cursor.fetchall()
+        for row in records:
+            if row[0]==rowid:
+                welcmsg = "Welcome "+row[1];
+                self.label_1 = Label(self, text=welcmsg,width=20,font=("bold", 30))
+                self.label_1.place(x=200,y=20)
+                self.label_2 = Label(self, text="User Details",width=50,font=("bold", 10))
+                self.label_2.place(x=100,y=80)
+                strname="Name: "+row[1]
+                stremail="Email: "+row[2]
+                strphone="Phone: "+str(row[3])
+                stradd="Age: "+str(row[5])
+                stractivestatus="Active Status: "+row[6]
+
+        self.label_1 = Label(self, text=strname,width=50,font=("bold", 10))
+        self.label_1.place(x=100,y=100)
+        self.label_2 = Label(self, text=stremail,width=50,font=("bold", 10))
+        self.label_2.place(x=100,y=120)
+        self.label_3 = Label(self, text=strphone,width=50,font=("bold", 10))
+        self.label_3.place(x=100,y=140)
+        self.label_4 = Label(self, text=stradd,width=50,font=("bold", 10))
+        self.label_4.place(x=100,y=160)
+        self.label_5 = Label(self, text=stractivestatus,width=50,font=("bold", 10))
+        self.label_5.place(x=100,y=160) 
 class restsignin(Toplevel):
   restemail=StringVar()
   Password=StringVar()
@@ -580,38 +729,86 @@ class custsignin(Toplevel):
 class complaintsignin(Toplevel):
   comemail = StringVar()
   pas = StringVar()
+  def database(self):
+      conn = sqlite3.connect('data.db')
+      with conn:
+            cursor=conn.cursor()
+      strrest = self.comemail.get()
+      cursor.execute('CREATE INDEX IF NOT EXISTS com_email ON ComplaintExec(comemail)')
+      conn.commit()
+      cursor.execute('SELECT COUNT(*) FROM ComplaintExec WHERE comemail = ?',(strrest,))
+      records = cursor.fetchall()
+      for row in records:
+          cnt = row[0]
+      if cnt == 0:
+          self.label_1 = Label(self, text="Email Address does not exist",width=20,font=("bold", 10))
+          self.label_1.place(x=110,y=200)
+      else:
+          cursor.execute('SELECT * FROM ComplaintExec WHERE comemail = ?',(strrest,))
+          records = cursor.fetchall()
+          for row in records:
+              if row[4]!=self.pas.get():
+                  self.label_pass = Label(self, text="Wrong Password",width=20,font=("bold", 10))
+                  self.label_pass.place(x=140,y=200)
+              else:
+                  comDash(row[0]) 
   def __init__(self):
     Toplevel.__init__(self)
     self.geometry('500x500')
-    self.label_1 = Label(self, text="Enter your name",width=20,font=("bold", 10))
+    self.label_1 = Label(self, text="Enter your email",width=20,font=("bold", 10))
     self.label_1.place(x=50,y=53)
     
-    self.entry_1 = Entry(self,)
+    self.entry_1 = Entry(self,textvar=self.comemail)
     self.entry_1.place(x=270,y=53)
 
-    self.label_2 = Label(self, show='*', text="Enter Password",width=20,font=("bold", 10))
+    self.label_2 = Label(self,text="Enter Password",width=20,font=("bold", 10))
     self.label_2.place(x=50,y=93)
     
-    self.entry_2 = Entry(self,)
+    self.entry_2 = Entry(self,show="*",textvar=self.pas)
     self.entry_2.place(x=270,y=93)
+    Button(self, text='Submit',width=20,bg='brown',fg='white',command=self.database).place(x=180,y=150)
 
 class deliveryexecsignin(Toplevel):
   delemail = StringVar()
   pas = StringVar()
+  def database(self):
+      conn = sqlite3.connect('data.db')
+      with conn:
+            cursor=conn.cursor()
+      strrest = self.delemail.get()
+      cursor.execute('CREATE INDEX IF NOT EXISTS del_email ON DeliveryExec(delemail)')
+      conn.commit()
+      cursor.execute('SELECT COUNT(*) FROM DeliveryExec WHERE delemail = ?',(strrest,))
+      records = cursor.fetchall()
+      for row in records:
+          cnt = row[0]
+      if cnt == 0:
+          self.label_1 = Label(self, text="Email Address does not exist",width=20,font=("bold", 10))
+          self.label_1.place(x=110,y=200)
+      else:
+          cursor.execute('SELECT * FROM DeliveryExec WHERE delemail = ?',(strrest,))
+          records = cursor.fetchall()
+          for row in records:
+              if row[5]!=self.pas.get():
+                  self.label_pass = Label(self, text="Wrong Password",width=20,font=("bold", 10))
+                  self.label_pass.place(x=140,y=200)
+              else:
+                  delDash(row[0]) 
   def __init__(self):
     Toplevel.__init__(self)
     self.geometry('500x500')
-    self.label_1 = Label(self, text="Enter your name",width=20,font=("bold", 10))
+    self.label_1 = Label(self, text="Enter your email",width=20,font=("bold", 10))
     self.label_1.place(x=50,y=53)
     
-    self.entry_1 = Entry(self,)
+    self.entry_1 = Entry(self,textvar = self.delemail)
     self.entry_1.place(x=270,y=53)
 
     self.label_2 = Label(self, text="Enter Password",width=20,font=("bold", 10))
     self.label_2.place(x=50,y=93)
     
-    self.entry_2 = Entry(self,)
+    self.entry_2 = Entry(self,show="*",textvar = self.pas)
     self.entry_2.place(x=270,y=93)
+    Button(self, text='Submit',width=20,bg='brown',fg='white',command=self.database).place(x=180,y=150)
 
 
 def cust():
