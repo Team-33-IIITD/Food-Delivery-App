@@ -72,7 +72,7 @@ class deliveryexec(Toplevel):
        phone=self.delph.get()
        age=self.delage.get()
        password = self.pas.get()
-       active_status = "active"
+       active_status = "free"
        with self.conn:
           cursor=self.conn.cursor()
        cursor.execute('CREATE TABLE IF NOT EXISTS DeliveryExec (DelID INT, delname TEXT, delemail TEXT, delphone INT,delage TEXT,password TEXT, activestatus TEXT)')
@@ -161,13 +161,13 @@ class restaurant(Toplevel):
            #else:
               #print(str(hr)+current_time[3:5]+" "+dur)
            if hr<hr1:
-               available_status="not open"
+               available_status="closed"
            elif hr==hr1 and mins<mins1:
-               available_status="not open"
+               available_status="closed"
            elif hr>hr2:
-               available_status="not open"
+               available_status="closed"
            elif hr==hr2 and mins>mins2:
-               available_status="not open"
+               available_status="closed"
            else:
                available_status="open"
                
@@ -205,28 +205,28 @@ class restaurant(Toplevel):
         self.label_0.place(x=90,y=53)
 
 
-        self.label_1 = Label(self, text="Restaurant Name",width=20,font=("bold", 10))
+        self.label_1 = Label(self, text="Name",width=20,font=("bold", 10))
         self.label_1.place(x=80,y=130)
 
         self.entry_1 = Entry(self,textvar=self.restname)
         self.entry_1.place(x=240,y=130)
 
-        self.label_2 = Label(self, text="Restaurant Email",width=20,font=("bold", 10))
+        self.label_2 = Label(self, text="Email",width=20,font=("bold", 10))
         self.label_2.place(x=68,y=180)
 
         self.entry_2 = Entry(self,textvar=self.restemail)
         self.entry_2.place(x=240,y=180)
 
-        self.label_3 = Label(self, text="Restaurant Phone Number",width=20,font=("bold", 10))
+        self.label_3 = Label(self, text="Phone Number",width=20,font=("bold", 10))
         self.label_3.place(x=70,y=230)
         self.entry_3 = Entry(self,textvar=self.restph)
         self.entry_3.place(x=240,y=230)
-        self.label_4 = Label(self, text="Restaurant Address",width=20,font=("bold", 10))
+        self.label_4 = Label(self, text="Address",width=20,font=("bold", 10))
         self.label_4.place(x=70,y=280)
         self.entry_4 = Entry(self,textvar=self.restadd)
         self.entry_4.place(x=240,y=280)
 
-        self.label_5 = Label(self, text="Restaurant Type",width=20,font=("bold", 10))
+        self.label_5 = Label(self, text="Type",width=20,font=("bold", 10))
         self.label_5.place(x=85,y=330)
         self.entry_5 = Entry(self,textvar=self.rest_type)
         self.entry_5.place(x=240,y=330)
@@ -235,12 +235,12 @@ class restaurant(Toplevel):
         self.entry_6 = Entry(self,show="*",textvar=self.pas)
         self.entry_6.place(x=240,y=380)
 
-        self.label_7 = Label(self, text="Open Time",width=20,font=("bold", 10))
+        self.label_7 = Label(self, text="Open Time (Enter in military-time)",width=20,font=("bold", 10))
         self.label_7.place(x=85,y=430)
         self.entry_7 = Entry(self,textvar=self.open_time)
         self.entry_7.place(x=240,y=430)
 
-        self.label_8 = Label(self, text="Close Time",width=20,font=("bold", 10))
+        self.label_8 = Label(self, text="Close Time (Enter in military-time)",width=20,font=("bold", 10))
         self.label_8.place(x=85,y=480)
         self.entry_8 = Entry(self,textvar=self.close_time)
         self.entry_8.place(x=240,y=480)
@@ -348,7 +348,7 @@ class sigin(Toplevel):
 class addItem(Toplevel):
     dname = StringVar()
     dtype = StringVar()
-    dprice = IntVar()
+    dprice = StringVar()
     davailability = StringVar()
     dsize = StringVar()
     rid=0
@@ -360,19 +360,22 @@ class addItem(Toplevel):
         dprice1=self.dprice.get()
         dav=self.davailability.get()
         dsize1=self.dsize.get()
-        
-        with self.conn:
-            cursor=self.conn.cursor()
-        cursor.execute('CREATE TABLE IF NOT EXISTS Menu (DishID INT, dishname TEXT, dishtype TEXT, restid INT,price INT, availability TEXT, size TEXT)')
-        cursor.execute('SELECT COUNT(*) FROM Menu')
-        records = cursor.fetchall()
-        for row in records:
-             n = int(row[0])
-        n=n+1
-        cursor.execute('INSERT INTO Menu (DishID,dishname,dishtype,restid,price,availability,size) VALUES(?,?,?,?,?,?,?)',(n,dname1,dtype1,self.rid,dprice1,dav,dsize1))
-        self.conn.commit()
-        self.label_confirm = Label(self, text='Item Added Succesfully !',width=20,font=("bold", 10))
-        self.label_confirm.place(x=180,y=460)
+        if (dav.lower() in ['available','not available']) and (dsize1.lower() in ['small','regular','medium','large'] and dprice1.isdigit()):
+            with self.conn:
+                cursor=self.conn.cursor()
+            cursor.execute('CREATE TABLE IF NOT EXISTS Menu (DishID INT, dishname TEXT, dishtype TEXT, restid INT,price INT, availability TEXT, size TEXT)')
+            cursor.execute('SELECT COUNT(*) FROM Menu')
+            records = cursor.fetchall()
+            for row in records:
+                 n = int(row[0])
+            n=n+1
+            cursor.execute('INSERT INTO Menu (DishID,dishname,dishtype,restid,price,availability,size) VALUES(?,?,?,?,?,?,?)',(n,dname1,dtype1,self.rid,dprice1,dav,dsize1))
+            self.conn.commit()
+            self.label_confirm = Label(self, text='Item Added Succesfully !',width=20,font=("bold", 10))
+            self.label_confirm.place(x=180,y=460)
+        else:
+            self.label_confirm = Label(self, text='Invalid Entries!',width=20,font=("bold", 10))
+            self.label_confirm.place(x=180,y=460)
     def __init__(self,restid):
         Toplevel.__init__(self)
         self.geometry('500x600')
@@ -432,9 +435,17 @@ class editItem(Toplevel):
             if self.dcolumn.get() == 'dishtype':
                 cursor.execute('UPDATE Menu SET dishtype = ? WHERE restid = ? AND DishID = ?',(self.dvalue.get(),self.rid,self.d_id.get()))
             if self.dcolumn.get() == 'availability':
-                cursor.execute('UPDATE Menu SET availability = ? WHERE restid = ? AND DishID = ?',(self.dvalue.get(),self.rid,self.d_id.get()))
+                if dvalue.get().lower() in ['available','not available']:
+                    cursor.execute('UPDATE Menu SET availability = ? WHERE restid = ? AND DishID = ?',(self.dvalue.get(),self.rid,self.d_id.get()))
+                else:
+                    self.label_notvalid = Label(self, text='Invalid Value',width=20,font=("bold", 10))
+                    self.label_notvalid.place(x=180,y=460)
             if self.dcolumn.get() == 'size':
-                cursor.execute('UPDATE Menu SET size = ? WHERE restid = ? AND DishID = ?',(self.dvalue.get(),self.rid,self.d_id.get()))
+                if dvalue.get().lower() in ['small','regular','medium','large']:
+                    cursor.execute('UPDATE Menu SET size = ? WHERE restid = ? AND DishID = ?',(self.dvalue.get(),self.rid,self.d_id.get()))
+                else:
+                    self.label_notvalid = Label(self, text='Invalid Value',width=20,font=("bold", 10))
+                    self.label_notvalid.place(x=180,y=460)
             self.conn.commit()
             self.label_confirm = Label(self, text='Item Edited Succesfully !',width=20,font=("bold", 10))
             self.label_confirm.place(x=180,y=460)
@@ -476,9 +487,7 @@ class editItem(Toplevel):
         self.entry_3 = Entry(self,textvar=self.dvalue)
         self.entry_3.place(x=240,y=230)
         Button(self, text='Submit',width=20,bg='brown',fg='white',command=self.database).place(x=180,y=400)
-        
-                
-        
+             
 class viewItem(Toplevel):
     rid = 0
     def __init__(self,restid):
