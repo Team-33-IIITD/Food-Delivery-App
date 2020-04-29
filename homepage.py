@@ -121,7 +121,7 @@ class restaurant(Toplevel):
     restname=StringVar()
     #ownername=StringVar()
     restemail=StringVar()
-    restph = IntVar()
+    restph = StringVar()
     restadd=StringVar()
     pas = StringVar()
     rest_type=StringVar()
@@ -130,70 +130,74 @@ class restaurant(Toplevel):
     availability=StringVar()
     conn = sqlite3.connect('data.db')
     def database(self):
-       name1=self.restname.get()
-       email=self.restemail.get()
-       phone=self.restph.get()
-       address=self.restadd.get()
-       type1=self.rest_type.get()
-       password = self.pas.get()
-       opentime = self.open_time.get()
-       closetime = self.close_time.get()
-       #available_status = self.availablity.get()
-       current_time = tm.strftime('%H:%M:%S')
-       #print(current_time)
-       hr = int(current_time[0:2])
-       mins = int(current_time[3:5])
-       hr1 = int(opentime[0:2])
-       mins1 = int(opentime[3:5])
-       hr2 = int(closetime[0:2])
-       mins2 = int(closetime[3:5])
-       #print(hr)
-       #if hr>12:
-          #dur='PM'
-       #else:
-          #dur='AM'
-       #if hr>12:
-          #print(str(hr-12)+":"+current_time[3:5]+" "+dur)
-       #else:
-          #print(str(hr)+current_time[3:5]+" "+dur)
-       if hr<hr1:
-           available_status="not open"
-       elif hr==hr1 and mins<mins1:
-           available_status="not open"
-       elif hr>hr2:
-           available_status="not open"
-       elif hr==hr2 and mins>mins2:
-           available_status="not open"
+       if not str(self.restph.get()).isdigit():
+           self.label_0 = Label(self, text="Phone Invalid",width=10,font=("bold", 20))
+           self.label_0.place(x=180,y=500)
        else:
-           available_status="open"
-           
-       #available_status = "available"
-       avg_price=0
-       with self.conn:
-          cursor=self.conn.cursor()
-       cursor.execute('CREATE TABLE IF NOT EXISTS Restaurant3 (RestID INT, restname TEXT,restemail TEXT,restphone INT,restadd TEXT,type TEXT, avgprice TEXT,password TEXT, closetime TEXT,opentime TEXT,available TEXT)')
-       cursor.execute('SELECT COUNT(*) FROM Restaurant3')
-       records = cursor.fetchall()
-       for row in records:
-            n = int(row[0])
-       n=n+1
-       cursor.execute('SELECT COUNT(*) FROM Restaurant3 WHERE restemail = ?',(email,))
-       records = cursor.fetchall()
-       for row in records:
-            n1 = int(row[0])
-       cursor.execute('SELECT COUNT(*) FROM Restaurant3 WHERE restphone = ?',(phone,))
-       records = cursor.fetchall()
-       for row in records:
-            n2 = int(row[0])
-       #custid=str(n)
-       if n1==0 and n2==0:
-           cursor.execute('INSERT INTO Restaurant3 (RestID,restname,restemail,restphone,restadd,type,avgprice,password,closetime,opentime,available) VALUES(?,?,?,?,?,?,?,?,?,?,?)',(n,name1,email,phone,address,type1,avg_price,password,closetime,opentime,available_status))
-           self.conn.commit()
-           self.confirm = Label(self, text="Restaurant Registered!",width=20,font=("bold", 10))
-           self.confirm.place(x=180,y=560)
-       else:
-           self.inv = Label(self, text="Email/Phone number already taken",width=20,font=("bold", 10))
-           self.inv.place(x=180,y=560)
+           name1=self.restname.get()
+           email=self.restemail.get()
+           phone=self.restph.get()
+           address=self.restadd.get()
+           type1=self.rest_type.get()
+           password = self.pas.get()
+           opentime = self.open_time.get()
+           closetime = self.close_time.get()
+           #available_status = self.availablity.get()
+           current_time = tm.strftime('%H:%M:%S')
+           #print(current_time)
+           hr = int(current_time[0:2])
+           mins = int(current_time[3:5])
+           hr1 = int(opentime[0:2])
+           mins1 = int(opentime[3:5])
+           hr2 = int(closetime[0:2])
+           mins2 = int(closetime[3:5])
+           #print(hr)
+           #if hr>12:
+              #dur='PM'
+           #else:
+              #dur='AM'
+           #if hr>12:
+              #print(str(hr-12)+":"+current_time[3:5]+" "+dur)
+           #else:
+              #print(str(hr)+current_time[3:5]+" "+dur)
+           if hr<hr1:
+               available_status="not open"
+           elif hr==hr1 and mins<mins1:
+               available_status="not open"
+           elif hr>hr2:
+               available_status="not open"
+           elif hr==hr2 and mins>mins2:
+               available_status="not open"
+           else:
+               available_status="open"
+               
+           #available_status = "available"
+           avg_price=0
+           with self.conn:
+              cursor=self.conn.cursor()
+           cursor.execute('CREATE TABLE IF NOT EXISTS Restaurant3 (RestID INT, restname TEXT,restemail TEXT,restphone INT,restadd TEXT,type TEXT, avgprice TEXT,password TEXT, closetime TEXT,opentime TEXT,available TEXT)')
+           cursor.execute('SELECT COUNT(*) FROM Restaurant3')
+           records = cursor.fetchall()
+           for row in records:
+                n = int(row[0])
+           n=n+1
+           cursor.execute('SELECT COUNT(*) FROM Restaurant3 WHERE restemail = ?',(email,))
+           records = cursor.fetchall()
+           for row in records:
+                n1 = int(row[0])
+           cursor.execute('SELECT COUNT(*) FROM Restaurant3 WHERE restphone = ?',(phone,))
+           records = cursor.fetchall()
+           for row in records:
+                n2 = int(row[0])
+           #custid=str(n)
+           if n1==0 and n2==0:
+               cursor.execute('INSERT INTO Restaurant3 (RestID,restname,restemail,restphone,restadd,type,avgprice,password,closetime,opentime,available) VALUES(?,?,?,?,?,?,?,?,?,?,?)',(n,name1,email,phone,address,type1,avg_price,password,closetime,opentime,available_status))
+               self.conn.commit()
+               self.confirm = Label(self, text="Restaurant Registered!",width=20,font=("bold", 10))
+               self.confirm.place(x=180,y=560)
+           else:
+               self.inv = Label(self, text="Email/Phone number already taken",width=20,font=("bold", 10))
+               self.inv.place(x=180,y=560)
     def __init__(self):
         Toplevel.__init__(self)
         self.geometry('500x600')
@@ -245,41 +249,47 @@ class restaurant(Toplevel):
 class customer(Toplevel):
     Fullname=StringVar()
     Email=StringVar()
-    phonenum = IntVar()
+    phonenum = StringVar()
     add=StringVar()
     mem= StringVar()
     pas = StringVar()
     coupid = IntVar()
     conn = sqlite3.connect('data.db')
     def database(self):
-       name1=self.Fullname.get()
-       email=self.Email.get()
-       phone=self.phonenum.get()
-       address=self.add.get()
-       membership=self.mem.get()
-       password = self.pas.get()
-       cid = self.coupid.get()
-       with self.conn:
-          cursor=self.conn.cursor()
-       cursor.execute('CREATE TABLE IF NOT EXISTS Customer3 (CustID INT, Fullname TEXT,Email TEXT,Phone INT,Address TEXT,Membership TEXT, Password TEXT, CouponID INT)')
-       cursor.execute('SELECT COUNT(*) FROM Customer3')
-       records = cursor.fetchall()
-       for row in records:
-            n = int(row[0])
-       n=n+1
-       custid=str(n)
-       cursor.execute('SELECT COUNT(*) FROM Customer3 WHERE Email = ?',(email,))
-       records = cursor.fetchall()
-       for row in records:
-            n1 = int(row[0])
-       
-       if n1==0:
-           cursor.execute('INSERT INTO Customer3 (CustID,FullName,Email,Phone,Address,Membership,Password,CouponID) VALUES(?,?,?,?,?,?,?,?)',(n,name1,email,phone,address,membership,password,cid))
-           self.conn.commit()
-       else:
-           #print("hello")
-           self.label_inv = Label(self, text="Email already exists",width=20,font=("bold", 20))
-           self.label_inv.place(x=180,y=500)
+       #print(str(self.phonenum.get()))
+       if not str(self.phonenum.get()).isdigit():
+           self.label_0 = Label(self, text="Phone Invalid",width=10,font=("bold", 20))
+           self.label_0.place(x=180,y=500)
+       else:     
+           name1=self.Fullname.get()
+           email=self.Email.get()
+           phone=self.phonenum.get()
+           address=self.add.get()
+           membership=self.mem.get()
+           password = self.pas.get()
+           cid = self.coupid.get()
+           
+           with self.conn:
+              cursor=self.conn.cursor()
+           cursor.execute('CREATE TABLE IF NOT EXISTS Customer3 (CustID INT, Fullname TEXT,Email TEXT,Phone INT,Address TEXT,Membership TEXT, Password TEXT, CouponID INT)')
+           cursor.execute('SELECT COUNT(*) FROM Customer3')
+           records = cursor.fetchall()
+           for row in records:
+                n = int(row[0])
+           n=n+1
+           custid=str(n)
+           cursor.execute('SELECT COUNT(*) FROM Customer3 WHERE Email = ?',(email,))
+           records = cursor.fetchall()
+           for row in records:
+                n1 = int(row[0])
+           
+           if n1==0:
+               cursor.execute('INSERT INTO Customer3 (CustID,FullName,Email,Phone,Address,Membership,Password,CouponID) VALUES(?,?,?,?,?,?,?,?)',(n,name1,email,phone,address,membership,password,cid))
+               self.conn.commit()
+           else:
+               #print("hello")
+               self.label_inv = Label(self, text="Email already exists",width=20,font=("bold", 20))
+               self.label_inv.place(x=180,y=500)
     def __init__(self):
         Toplevel.__init__(self)
         self.geometry('500x600')
@@ -322,7 +332,9 @@ class customer(Toplevel):
         self.label_7.place(x=85,y=430)
         self.entry_7 = Entry(self,textvar=self.coupid)
         self.entry_7.place(x=240,y=430)
+        
         Button(self, text='Submit',width=20,bg='brown',fg='white',command=self.database).place(x=180,y=480)
+        
         #Button(self, text='Restraunt SignUp',width=20,bg='brown',fg='white',command=self.rest).place(x=200,y=490)
 
 class sigin(Toplevel):
